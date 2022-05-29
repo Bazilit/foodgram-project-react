@@ -11,10 +11,10 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # apps
     'api.apps.ApiConfig',
+    'users.apps.UsersConfig',
     # library
     'rest_framework',
     'rest_framework_simplejwt',
-    'drf_yasg',
     'django_filters',
     # main
     'django.contrib.admin',
