@@ -29,6 +29,8 @@ class CustomUserViewset(views.UserViewSet):
 
     @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated], url_path='subscriptions', url_name='subscriptions',)
     def subscriptions(self, request):
+        """метод запроса подписок."""
+
         user = request.user
         queryset = Follow.objects.filter(user=user)
         pages = self.paginate_queryset(queryset)
@@ -41,6 +43,8 @@ class CustomUserViewset(views.UserViewSet):
     
     @action(methods=['post', 'delete'], detail=True, permission_classes=[IsAuthenticated], url_path='subscribe', url_name='subscribe',)
     def subscribe(self, request, id=None):
+        """Метод управления подписками."""
+
         if request.method == 'POST':
             user = request.user
             author = get_object_or_404(User, id=id)

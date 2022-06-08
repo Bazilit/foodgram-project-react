@@ -14,6 +14,7 @@ INSTALLED_APPS = [
     'users.apps.UsersConfig',
     # library
     'rest_framework',
+    'django_filters',
     'djoser',
     'rest_framework_simplejwt',
     # main
