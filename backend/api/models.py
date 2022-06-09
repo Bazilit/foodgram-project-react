@@ -43,7 +43,7 @@ class Recipe(models.Model):
     text = models.TextField(verbose_name='Описание',)
     name = models.CharField(verbose_name='Название', max_length=200,)
     image = models.ImageField(verbose_name='Изображение', upload_to='images/')
-    tags = models.ManyToManyField(Tag, related_name='recipes', verbose_name='Тэги',)
+    tags = models.ManyToManyField(Tag, related_name='recipe', verbose_name='Тэги',)
     ingredients = models.ManyToManyField(Ingredient, verbose_name='Ингредиенты', through='IngredientInRecipe', through_fields=('recipe', 'ingredient'))
     author =  models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipes', db_column='author', verbose_name='Автор',)
     pub_date = models.DateField(default=date.today, verbose_name='Дата публикации', db_index=True)

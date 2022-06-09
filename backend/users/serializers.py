@@ -3,7 +3,7 @@ from users.models import Follow, User
 from api.models import Recipe
 from api import serializers as api_serializers
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework.validators import UniqueValidator
+from rest_framework.validators import UniqueValidator, RegexValidator
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -22,7 +22,11 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             UniqueValidator(
                 message='Данный логин уже существует. Пожалуйста, выберите другой.',
                 queryset=User.objects.all()
-            )
+            ),
+            RegexValidator(
+                regex='^[\w.@+-]+\z',
+                message='Недопустимый символ в имени пользователя.',
+            ),
         ]
     )
 
@@ -65,7 +69,15 @@ class FollowSerializer(serializers.ModelSerializer):
 
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
-    username = serializers.ReadOnlyField(source='author.username')
+    username = serializers.ReadOnlyField(
+        source='author.username',
+        validators=[
+            RegexValidator(
+                regex='^[\w.@+-]+\z',
+                message='Недопустимый символ в имени пользователя.',
+                ),
+            ]
+        )
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
     is_subscribed = serializers.SerializerMethodField()

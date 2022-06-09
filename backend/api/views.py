@@ -1,5 +1,5 @@
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from api.models import Tag, Ingredient, Recipe, ShoppingCart, Favorite
+from api.models import Tag, Ingredient, Recipe, ShoppingCart, Favorite, IngredientInRecipe
 from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteSerializer
 from api.filters import IngredientSearchFilter, FavoritedAndshoppingCartAndAuthorAndTagFilter
 from api.permissions import IsAdmin, ReadOnly, IsOwner
@@ -9,6 +9,9 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
+from django.http.response import HttpResponse
+from django.db.models import F, Sum
+
 
 
 class TagViewSet(ReadOnlyModelViewSet):
@@ -46,8 +49,28 @@ class RecipeViewSet(ModelViewSet):
         """Добавление рецепта."""
         serializer.save(author=self.request.user)
     
-    def download_shopping_cart(self):
-        pass
+    @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated], url_path='download_shopping_cart', url_name='download_shopping_cart',)
+    def download_shopping_cart(self, request):
+        """Выгрузка данных о покупке в текстовом формате."""
+
+        user = request.user
+        if not user.shopping_carts.exists():
+            return Response(status=status.HTTP_400_BAD_REQUEST)
+        ingredients = IngredientInRecipe.objects.filter(
+            recipe__in=(user.shopping_carts.values('id'))
+        ).values(
+            ingredient=F('ingredients__name'),
+            measure=F('ingredients__measurement_unit')
+        ).annotate(amount=Sum('amount'))
+        for ingredient in ingredients:
+            shopping_list += (
+                f'{ingredient["ingredient"]}: {ingredient["amount"]} {ingredient["measure"]}\n'
+            )
+        response = HttpResponse(
+            shopping_list, content_type='text.txt; charset=utf-8'
+        )
+        response['Content-Disposition'] = f'attachment; filename={shopping_list}'
+        return response
 
     @action(methods=['post', 'delete'], detail=True, permission_classes=[IsAuthenticated], url_path='shopping_cart', url_name='shopping_cart',)
     def shopping_cart(self, request, pk=id):

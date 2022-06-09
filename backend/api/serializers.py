@@ -1,11 +1,24 @@
 from rest_framework.serializers import ModelSerializer, CharField, SerializerMethodField, IntegerField
-from api.models import Tag, Ingredient, IngredientInRecipe, Recipe, Favorite, ShoppingCart
+from api.models import Tag, Ingredient, IngredientInRecipe, Recipe, Favorite
 from users.serializers import CustomUserSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from rest_framework.validators import RegexValidator
 
 
 class TagSerializer(ModelSerializer):
     """Серилайзер для модели Tag."""
+
+    slug = serializers.SlugField(
+        max_length=200,
+        unique=True,
+        validators=[
+            RegexValidator(
+                regex='^[-a-zA-Z0-9_]+$',
+                message='Недопустимый символ в slug.',
+                ),
+            ]
+        )
 
     class Meta:
         model = Tag
