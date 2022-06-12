@@ -1,9 +1,11 @@
 from rest_framework import serializers
-from users.models import Follow, User
+from users.models import Subscription, User
 from api.models import Recipe
-from api import serializers as api_serializers
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework.validators import UniqueValidator, RegexValidator
+from rest_framework.validators import UniqueValidator
+from django.core.validators import RegexValidator
+from rest_framework.serializers import ModelSerializer
+from drf_extra_fields.fields import Base64ImageField
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
@@ -22,10 +24,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
             UniqueValidator(
                 message='Данный логин уже существует. Пожалуйста, выберите другой.',
                 queryset=User.objects.all()
-            ),
-            RegexValidator(
-                regex='^[\w.@+-]+\z',
-                message='Недопустимый символ в имени пользователя.',
             ),
         ]
     )
@@ -58,25 +56,29 @@ class CustomUserSerializer(UserSerializer):
 
     def get_is_subscribed(self, obj):
         user = self.context.get('request').user
-        return user.is_authenticated and Follow.objects.filter(
+        return user.is_authenticated and Subscription.objects.filter(
             user=user, author=obj.id
         ).exists()
 
 
+class ShoppingCartSerializer(ModelSerializer):
+    """Серилайзер для модели ShoppingCart."""
+     
+    image = Base64ImageField()
 
-class FollowSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Recipe
+        fields = ('id', 'name', 'image', 'cooking_time')
+        read_only_fields = ('id', 'name', 'image', 'cooking_time')
+
+
+class SubscriptionSerializer(serializers.ModelSerializer):
     """Серилайзер для подписки."""
 
     email = serializers.ReadOnlyField(source='author.email')
     id = serializers.ReadOnlyField(source='author.id')
     username = serializers.ReadOnlyField(
         source='author.username',
-        validators=[
-            RegexValidator(
-                regex='^[\w.@+-]+\z',
-                message='Недопустимый символ в имени пользователя.',
-                ),
-            ]
         )
     first_name = serializers.ReadOnlyField(source='author.first_name')
     last_name = serializers.ReadOnlyField(source='author.last_name')
@@ -85,7 +87,7 @@ class FollowSerializer(serializers.ModelSerializer):
     recipes_count = serializers.SerializerMethodField()
 
     class Meta:
-        model = Follow
+        model = Subscription
         fields = ('email', 'id', 'username', 'first_name', 'last_name',
                   'is_subscribed', 'recipes', 'recipes_count')
         extra_kwargs = {
@@ -93,7 +95,7 @@ class FollowSerializer(serializers.ModelSerializer):
         }
 
     def get_is_subscribed(self, obj):
-        return Follow.objects.filter(
+        return Subscription.objects.filter(
             user=obj.user, author=obj.author
         ).exists()
 
@@ -103,8 +105,7 @@ class FollowSerializer(serializers.ModelSerializer):
         queryset = Recipe.objects.filter(author=obj.author)
         if limit:
             queryset = queryset[:int(limit)]
-        return api_serializers.CropRecipeSerializer(queryset,
-                                                    many=True).data
+        return ShoppingCartSerializer(queryset, many=True).data
 
     def get_recipes_count(self, obj):
         return Recipe.objects.filter(author=obj.author).count()

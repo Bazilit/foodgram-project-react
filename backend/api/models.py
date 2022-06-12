@@ -9,7 +9,7 @@ class Tag(models.Model):
 
     name = models.CharField(verbose_name='Название тэга', max_length=200, unique=True)
     color = models.CharField(verbose_name='Цвет тэга', help_text='Цвет в формате HEX. Пример: #E26C2D', max_length=10, unique=True,)
-    slug = models.SlugField(verbose_name='Слаг тэга', max_length=200, unique=True)
+    slug = models.SlugField(verbose_name='Слаг тэга', max_length=200, unique=True,)
     
     class Meta:
         verbose_name = 'Тэг'
