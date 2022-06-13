@@ -44,7 +44,7 @@ class Recipe(models.Model):
     name = models.CharField(verbose_name='Название', max_length=200,)
     image = models.ImageField(verbose_name='Изображение', upload_to='images/')
     tags = models.ManyToManyField(Tag, related_name='recipe', verbose_name='Тэги',)
-    ingredients = models.ManyToManyField(Ingredient, verbose_name='Ингредиенты', through='IngredientInRecipe', through_fields=('recipe', 'ingredient'))
+    ingredients = models.ManyToManyField(Ingredient, through='IngredientInRecipe', verbose_name='Ингредиенты', related_name='recipes',)
     author =  models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipes', db_column='author', verbose_name='Автор',)
     pub_date = models.DateField(default=date.today, verbose_name='Дата публикации', db_index=True)
     
@@ -52,9 +52,6 @@ class Recipe(models.Model):
         verbose_name = 'Рецепт'
         verbose_name_plural = 'Рецепты'
         ordering = ['-pub_date']
-    
-    def __str__(self):
-        return self.name
 
 
 class IngredientInRecipe(models.Model):
@@ -65,6 +62,7 @@ class IngredientInRecipe(models.Model):
     amount = models.PositiveSmallIntegerField(verbose_name='Кол-во', validators=[MinValueValidator(1, message='Недопустимое кол-во.')],)
 
     class Meta:
+        ordering = ['-id']
         verbose_name = 'Ингредиент в рецепте'
         verbose_name_plural = 'Ингредиенты в рецепте'
         constraints = [models.UniqueConstraint(fields=['recipe', 'ingredient'], name='unique_recipe_ingredient')]
