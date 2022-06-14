@@ -3,7 +3,6 @@ from users.models import Subscription, User
 from api.models import Recipe
 from djoser.serializers import UserCreateSerializer, UserSerializer
 from rest_framework.validators import UniqueValidator
-from django.core.validators import RegexValidator
 from rest_framework.serializers import ModelSerializer
 from drf_extra_fields.fields import Base64ImageField
 
@@ -14,15 +13,15 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     email = serializers.EmailField(
         validators=[
             UniqueValidator(
-                message='Данный адрес уже используется другой учетной записью.',
+                message='Данный адрес уже используется.',
                 queryset=User.objects.all()
-            )
-        ]
-    )
+                )
+            ]
+        )
     username = serializers.CharField(
         validators=[
             UniqueValidator(
-                message='Данный логин уже существует. Пожалуйста, выберите другой.',
+                message='Данный логин уже существует.',
                 queryset=User.objects.all()
             ),
         ]
@@ -63,7 +62,7 @@ class CustomUserSerializer(UserSerializer):
 
 class ShoppingCartSerializer(ModelSerializer):
     """Серилайзер для модели ShoppingCart."""
-     
+
     image = Base64ImageField()
 
     class Meta:

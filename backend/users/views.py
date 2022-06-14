@@ -1,7 +1,5 @@
-from django.shortcuts import render
-from djoser import utils, views
+from djoser import views
 from rest_framework.response import Response
-from djoser.serializers import TokenSerializer
 from rest_framework import status
 from users.models import User, Subscription
 from rest_framework.decorators import action
@@ -12,11 +10,20 @@ from users.serializers import SubscriptionSerializer
 
 
 class CustomUserViewset(views.UserViewSet):
-    """Стандартный djoser класс пользователя с добавлением методов управления подписками."""
+    """
+    Стандартный djoser класс пользователя с
+    добавлением методов управления подписками.
+    """
 
     pagination_class = LimitPageNumberPagination
 
-    @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated], url_path='subscriptions', url_name='subscriptions',)
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='subscriptions',
+        url_name='subscriptions',
+        )
     def subscriptions(self, request):
         """метод запроса подписок."""
 
@@ -29,8 +36,14 @@ class CustomUserViewset(views.UserViewSet):
             context={'request': request}
         )
         return self.get_paginated_response(serializer.data)
-    
-    @action(methods=['post', 'delete'], detail=True, permission_classes=[IsAuthenticated], url_path='subscribe', url_name='subscribe',)
+
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[IsAuthenticated],
+        url_path='subscribe',
+        url_name='subscribe',
+        )
     def subscribe(self, request, id=None):
         """Метод управления подписками."""
 

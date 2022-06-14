@@ -1,7 +1,19 @@
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
-from api.models import Tag, Ingredient, Recipe, ShoppingCart, Favorite, IngredientInRecipe
-from api.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, FavoriteSerializer
-from api.filters import IngredientSearchFilter, FavoritedAndshoppingCartAndAuthorAndTagFilter
+from api.models import (
+    Tag, Ingredient,
+    Recipe, ShoppingCart,
+    Favorite, IngredientInRecipe
+    )
+from api.serializers import (
+    TagSerializer,
+    IngredientSerializer,
+    RecipeSerializer,
+    FavoriteSerializer
+    )
+from api.filters import (
+    IngredientSearchFilter,
+    FavoritedAndshoppingCartAndAuthorAndTagFilter
+    )
 from api.permissions import IsAdmin, ReadOnly, IsOwner
 from api.pagination import LimitPageNumberPagination
 from rest_framework.response import Response
@@ -12,9 +24,11 @@ from rest_framework.permissions import IsAuthenticated
 from django.http.response import HttpResponse
 
 
-
 class TagViewSet(ReadOnlyModelViewSet):
-    """Обработка тегов по запросу. Права на изменение тегов только у Администратора."""
+    """
+    Обработка тегов по запросу.
+    Права на изменение тегов только у Администратора.
+    """
 
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -30,8 +44,9 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
     permission_classes = [IsAdmin | ReadOnly]
-    filter_backends = [IngredientSearchFilter,]
-    search_fields = ['^name',]
+    filter_backends = [IngredientSearchFilter, ]
+    search_fields = ['^name', ]
+
 
 class RecipeViewSet(ModelViewSet):
     """
@@ -46,10 +61,16 @@ class RecipeViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         """Добавление рецепта."""
-        
+
         serializer.save(author=self.request.user)
-    
-    @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated], url_path='download_shopping_cart', url_name='download_shopping_cart',)
+
+    @action(
+        methods=['get'],
+        detail=False,
+        permission_classes=[IsAuthenticated],
+        url_path='download_shopping_cart',
+        url_name='download_shopping_cart',
+        )
     def download_shopping_cart(self, request):
         """Выгрузка данных о покупке в текстовом формате."""
 
@@ -78,7 +99,13 @@ class RecipeViewSet(ModelViewSet):
         response['Content-Disposition'] = 'attachment; filename="shoplist.txt"'
         return response
 
-    @action(methods=['post', 'delete'], detail=True, permission_classes=[IsAuthenticated], url_path='shopping_cart', url_name='shopping_cart',)
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[IsAuthenticated],
+        url_path='shopping_cart',
+        url_name='shopping_cart',
+        )
     def shopping_cart(self, request, pk=id):
         """Добавление и удаление рецепта из список покупок."""
 
@@ -86,8 +113,14 @@ class RecipeViewSet(ModelViewSet):
             return self.add(ShoppingCart, request, pk)
         elif request.method == 'DELETE':
             return self.delete_shopping_cart(request, pk)
-    
-    @action(methods=['post', 'delete'], detail=True, permission_classes=[IsAuthenticated], url_path='favorite', url_name='favorite',)
+
+    @action(
+        methods=['post', 'delete'],
+        detail=True,
+        permission_classes=[IsAuthenticated],
+        url_path='favorite',
+        url_name='favorite',
+        )
     def favorite(self, request, pk=None):
         """Добавление и удаление рецепта из избранное."""
 
@@ -102,7 +135,10 @@ class RecipeViewSet(ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         if model.objects.filter(user=user, recipe=recipe).exists():
-            return Response({'errors': 'Вы уже ранее добавляли данный рецепт в корзину.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {'errors': 'Вы уже ранее добавляли данный рецепт в корзину.'},
+                status=status.HTTP_400_BAD_REQUEST
+                )
         favorite = model.objects.create(user=user, recipe=recipe)
         serializer = FavoriteSerializer(favorite)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -117,7 +153,7 @@ class RecipeViewSet(ModelViewSet):
         )
         favorites.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
-    
+
     def delete_favorite(self, request, pk=None):
         """метод удаления из избранного."""
 

@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 
+
 class User(AbstractUser):
     """Модель кастомного пользователя"""
     AUTHENTICATED = 'user'
@@ -16,7 +17,7 @@ class User(AbstractUser):
         blank=False,
         validators=[
             RegexValidator(
-                regex='^[\w.@+-]+\Z',
+                regex=r'^[\w.@+-]+\Z',
                 ),
         ]
     )
@@ -26,7 +27,7 @@ class User(AbstractUser):
     password = models.CharField(verbose_name='Пароль', max_length=150)
     role = models.CharField(verbose_name='Роль', max_length=200,
                             choices=ROLE_CHOICES, default=AUTHENTICATED)
-    
+
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email', 'first_name', 'last_name', 'password']
 
@@ -39,22 +40,32 @@ class User(AbstractUser):
                 fields=('username', 'email'), name='unique_username_email'
             )
         ]
-        
+
     def __str__(self):
         return self.username
 
     @property
     def is_admin(self):
         return self.role == User.ADMINISTRATOR
-        
-        
+
+
 class Subscription(models.Model):
     """
     user — тот, кто подписывается.
     author — тот, на кого подписываются.
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="subscriber", verbose_name='subscriber')
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="following", verbose_name='following')
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="subscriber",
+        verbose_name='subscriber'
+        )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="following",
+        verbose_name='following'
+        )
 
     class Meta:
         verbose_name = 'subscribe'
@@ -64,5 +75,4 @@ class Subscription(models.Model):
                 fields=['user', 'author'],
                 name='unique_user_author'
             )
-        ]        
-
+        ]
