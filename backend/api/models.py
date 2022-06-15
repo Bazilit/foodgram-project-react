@@ -1,6 +1,7 @@
-from django.db import models
 from django.core.validators import MinValueValidator
+from django.db import models
 from django.utils.datetime_safe import date
+
 from users.models import User
 
 

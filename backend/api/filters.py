@@ -1,5 +1,6 @@
-from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import CharFilter, FilterSet
+from rest_framework.filters import SearchFilter
+
 from api.models import Recipe
 
 

@@ -1,6 +1,7 @@
-from rest_framework.routers import DefaultRouter
-from users.views import CustomUserViewset
 from django.urls import include, path
+from rest_framework.routers import DefaultRouter
+
+from users.views import CustomUserViewset
 
 app_name = 'users'
 

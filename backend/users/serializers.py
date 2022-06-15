@@ -1,10 +1,11 @@
-from rest_framework import serializers
-from users.models import Subscription, User
-from api.models import Recipe
 from djoser.serializers import UserCreateSerializer, UserSerializer
-from rest_framework.validators import UniqueValidator
-from rest_framework.serializers import ModelSerializer
 from drf_extra_fields.fields import Base64ImageField
+from rest_framework import serializers
+from rest_framework.serializers import ModelSerializer
+from rest_framework.validators import UniqueValidator
+
+from api.models import Recipe
+from users.models import Subscription, User
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):
