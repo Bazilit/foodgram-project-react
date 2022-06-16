@@ -11,8 +11,7 @@ services:
       - ./.env
 
   backend:
-    build:
-      image: bazilit/foodgram_backend:latest
+    image: bazilit/foodgram_backend:latest
     restart: always
     volumes:
       - static_value:/app/static/
@@ -23,9 +22,7 @@ services:
       - ./.env
 
   frontend:
-    build:
-      image: bazilit/foodgram_frontend:latest
-      dockerfile: Dockerfile
+    image: bazilit/foodgram_frontend:latest
     volumes:
       - ../frontend/:/app/result_build/
     depends_on:
