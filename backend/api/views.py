@@ -117,8 +117,8 @@ class RecipeViewSet(ModelViewSet):
         user = request.user
         recipe = get_object_or_404(Recipe, id=pk)
         if request.method == 'POST':
-            object = model.objects.filter(user=user, recipe=recipe)
-            if object.exists():
+            creation_model = model.objects.filter(user=user, recipe=recipe)
+            if creation_model.exists():
                 return Response(
                     {'errors': 'Данный объект уже создан.'},
                     status=status.HTTP_400_BAD_REQUEST
@@ -127,9 +127,9 @@ class RecipeViewSet(ModelViewSet):
             serializer = FavoriteSerializer(favorite)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         if request.method == 'DELETE':
-            object = model.objects.filter(user=user, recipe=recipe)
-            if object.exists():
-                object.delete()
+            delete_model = model.objects.filter(user=user, recipe=recipe)
+            if delete_model.exists():
+                delete_model.delete()
                 return Response(status=status.HTTP_204_NO_CONTENT)
             return Response(
                 {

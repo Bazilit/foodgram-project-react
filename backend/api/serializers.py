@@ -1,7 +1,6 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from rest_framework.serializers import (CharField, IntegerField,
-                                        ModelSerializer)
+from rest_framework.serializers import CharField, IntegerField, ModelSerializer
 from rest_framework.validators import UniqueValidator
 
 from api.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
@@ -152,14 +151,14 @@ class RecipeSerializer(serializers.ModelSerializer):
         read_only_fields = ('author',)
         model = Recipe
 
-    def validate(self, data):
+    def validate(self, validated_data):
         """
         Метод реализации валидатора.
         Входные данные проверяются на соответствие условиям.
         На выходе проверенные данные.
         """
 
-        ingredients = self.initial_data.get('ingredients')
+        ingredients = validated_data.get('ingredients')
         ingredients_list = []
         for ingredient in ingredients:
             ingredient_id = ingredient['id']
@@ -174,7 +173,7 @@ class RecipeSerializer(serializers.ModelSerializer):
                     'amount': 'Количество не может быть нулевым.'
                 })
 
-        tags = self.initial_data.get('tags')
+        tags = validated_data.get('tags')
         if not tags:
             raise serializers.ValidationError({
                 'tags': 'Не задан tag.'
@@ -187,22 +186,25 @@ class RecipeSerializer(serializers.ModelSerializer):
                 })
             tags_list.append(tag)
 
-        cooking_time = self.initial_data.get('cooking_time')
+        cooking_time = validated_data.get('cooking_time')
         if int(cooking_time) <= 0:
             raise serializers.ValidationError({
                 'cooking_time': 'Время не может быть нулевым.'
             })
-        return data
+        return validated_data
 
     def create_ingredients(self, ingredients, recipe):
         """Метод создания ингредиента."""
 
-        for ingredient in ingredients:
-            IngredientInRecipe.objects.bulk_create([IngredientInRecipe(
+        create_ingredient = [
+            IngredientInRecipe(
                 recipe=recipe,
                 ingredient=ingredient['id'],
                 amount=ingredient['amount']
-            )])
+                )
+            for ingredient in ingredients
+            ]
+        IngredientInRecipe.objects.bulk_create(create_ingredient)
 
     def create_tags(self, tags, recipe):
         """Метод создания тега."""
