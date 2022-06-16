@@ -48,6 +48,14 @@ jobs:
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram-project:latest
 
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v2
+        with:
+           push: true
+           context: ./frontend/
+           file: ./frontend/Dockerfile
+           tags: ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
+
   deploy:
     runs-on: ubuntu-latest
     needs: build_and_push_to_docker_hub
@@ -61,6 +69,8 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram-project:latest
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/foodgram_frontend:latest
             sudo docker-compose stop
             sudo docker-compose rm backend
             touch .env
