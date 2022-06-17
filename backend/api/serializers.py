@@ -26,7 +26,10 @@ class TagSerializer(ModelSerializer):
         fields = ('id', 'name', 'color', 'slug')
         extra_kwargs = {
             'id': {'required': True},
-        }
+            'name': {'required': False},
+            'slug': {'required': False},
+            'color': {'required': False}
+            }
 
 
 class IngredientSerializer(ModelSerializer):
@@ -35,6 +38,10 @@ class IngredientSerializer(ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
+        extra_kwargs = {
+            'name': {'required': False},
+            'measurement_unit': {'required': False}
+            }
 
 
 class FavoriteSerializer(ModelSerializer):
@@ -142,6 +149,10 @@ class RecipeSerializer(serializers.ModelSerializer):
     """
 
     ingredients = IngredientInRecipeSerializer(many=True)
+    tags = serializers.PrimaryKeyRelatedField(
+        queryset=Tag.objects.all(),
+        many=True
+        )
     author = CustomUserSerializer(read_only=True)
     image = Base64ImageField()
     cooking_time = serializers.IntegerField(min_value=0)
