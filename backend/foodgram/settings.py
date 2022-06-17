@@ -70,12 +70,12 @@ WSGI_APPLICATION = 'foodgram.wsgi.application'
 
 DATABASES = {
     'DEFAULT': {
-        'ENGINE': os.getenv('DB_ENGINE', DEFAULT='DJANGO.DB.BACKENDS.POSTGRESQL'),
-        'NAME': os.getenv('DB_NAME', DEFAULT='POSTGRES'),
-        'USER': os.getenv('POSTGRES_USER', DEFAULT='POSTGRES'),
-        'PASSWORD': os.getenv('POSTGRES_PASSWORD', DEFAULT='452882'),
-        'HOST': os.getenv('DB_HOST', DEFAULT='DB'),
-        'PORT': os.getenv('DB_PORT', DEFAULT='5432')
+        'ENGINE': os.getenv('DB_ENGINE', default='DJANGO.DB.BACKENDS.POSTGRESQL'),
+        'NAME': os.getenv('DB_NAME', default='POSTGRES'),
+        'USER': os.getenv('POSTGRES_USER', default='POSTGRES'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD', default='452882'),
+        'HOST': os.getenv('DB_HOST', default='DB'),
+        'PORT': os.getenv('DB_PORT', default='5432')
     }
 }
 
