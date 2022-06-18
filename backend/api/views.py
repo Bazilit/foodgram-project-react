@@ -82,7 +82,7 @@ class RecipeViewSet(ModelViewSet):
                 (
                     f"{ingredient['name']}: "
                     f"{ingredient['total_amount']} "
-                    f"{ingredient['unit']}"
+                    f"{ingredient['unit']}\n"
                     )
                 for ingredient in ingredients
                 ]
