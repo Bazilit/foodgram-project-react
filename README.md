@@ -135,6 +135,5 @@ sudo docker-compose exec backend python manage.py collectstatic --noinput
 sudo docker-compose exec backend python manage.py createsuperuser
 ```
 ---
-#### Автор: *Шарковский А.*
-*https://github.com/Bazilit*
+#### Автор: *Шарковский А.* *https://github.com/Bazilit*
 ---
