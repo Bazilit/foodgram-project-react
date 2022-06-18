@@ -1,10 +1,9 @@
-# Размещается в manage.py и там же data/json
 # docker-compose exec backend bash
-# python manage.py shell < autofill.py
+# python manage.py shell < ingredients_loading.py
 
 import json
 
-from recipes.models import Ingredient
+from api.models import Ingredient
 from django.core.management.base import BaseCommand
 
 
@@ -13,7 +12,6 @@ class Command(BaseCommand):
     help = 'Uploading Ingredients data-set'
 
     def handle(self, *args, **options):
-        """Handle the file which has data."""
         with open(
                 'data/ingredients.json', encoding='utf-8'
         ) as json_file:
