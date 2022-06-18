@@ -124,16 +124,17 @@ REST_FRAMEWORK = {
 }
 
 DJOSER = {
+    'LOGIN_FIELD': 'email',
+    'HIDE_USERS': False,
+    'PASSWORD_RESET_CONFIRM_URL': 'users/set_password/{uid}/{token}',
     'SERIALIZERS': {
         'user_create': 'users.serializers.CustomUserCreateSerializer',
         'user': 'users.serializers.CustomUserSerializer',
-        'current_user': 'users.serializers.CustomUserSerializer'
+        'current_user': 'users.serializers.CustomUserSerializer',
     },
     'PERMISSIONS': {
-        'user_list': ('rest_framework.permissions.AllowAny',),
-        'user': ('rest_framework.permissions.AllowAny',),
-    },
-    'HIDE_USERS': False,
-    'PASSWORD_RESET_CONFIRM_URL': 'users/set_password/{uid}/{token}',
-    'SEND_ACTIVATION_EMAIL': False,
+        'user': ('rest_framework.permissions.IsAuthenticated',),
+        'user_list': ('rest_framework.permissions.AllowAny',)
+    }
 }
+
