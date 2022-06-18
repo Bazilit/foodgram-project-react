@@ -1,6 +1,3 @@
-# docker-compose exec backend bash
-# python manage.py shell < ingredients_loading.py
-
 import json
 
 from api.models import Ingredient
