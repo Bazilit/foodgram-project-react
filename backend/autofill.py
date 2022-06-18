@@ -1,4 +1,4 @@
-import json
+from json import load
 
 from api.models import Ingredient
 from django.core.management.base import BaseCommand
@@ -12,7 +12,7 @@ class Command(BaseCommand):
         with open(
                 'data/ingredients.json', encoding='utf-8'
         ) as json_file:
-            ingredients = json.load(json_file)
+            ingredients = load(json_file)
             for ingredient in ingredients:
                 name = ingredient['name']
                 measurement_unit = ingredient['measurement_unit']
