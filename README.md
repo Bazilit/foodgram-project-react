@@ -1,5 +1,5 @@
-***Foodgram, «Продуктовый помощник»***
-#![yamdb workflow](https://github.com/Bazilit/foodgram-project-react/actions/workflows/main.yml/badge.svg)
+## ***Foodgram, «Продуктовый помощник»***
+![yamdb workflow](https://github.com/Bazilit/foodgram-project-react/actions/workflows/main.yml/badge.svg)
 
 ---
 ### Описание:
@@ -8,10 +8,9 @@
 
 ---
 ### Проект развернут по адресу:
-```
+
 [51.250.110.255](http://51.250.25.225/redoc/)
-```
-## ATTENTION! Проект на первой проверке review. На сервере не развернут.
+
 ---
 
 ### Стэк технологий:
@@ -25,10 +24,10 @@
 [![Yandex.Cloud](https://img.shields.io/badge/-Yandex.Cloud-464646?style=flat-square&logo=Yandex.Cloud)](https://cloud.yandex.ru/)
 ---
 
-## Инструкция по запуску проекта на сервере:
-#### 1. Склонировать репозиторий:
+## Инструкция по запуску проекта на удаленном сервере:
+#### 1. Подключиться и авторизоваться на удаленном сервере:
 ```
-git clone https://github.com/Bazilit/foodgram-project-react.git
+ssh <имя_сервера>@<публичный_ip_сервера>
 ```
 #### 2. Установите docker и docker-compose:
 * Установка docker:
@@ -40,13 +39,20 @@ sudo apt install docker.io
 sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
+#### 3. Найстройка nginx.conf и docker-compose.yml:
 * Отредактируйте файл infra/nginx.conf и в строке server_name замените IP по умолчанию на свой IP
-* Скопируйте файлы docker-compose.yml и nginx.conf из директории infra на сервер:
+* Скопируйте файлы docker-compose.yml и nginx.conf из директории infra на в директорию /home/<username>
+```
+sudo cp docker-compose.yml /home/<username>/
+sudo cp nginx.conf /home/<username>/
+```
+* Если проект находится на локальной машине. Скопируйте из директории infra файлы docker-compose.yml и nginx.conf и отправьте их на сервер:
 ```
 scp docker-compose.yml <username>@<host>:/home/<username>/docker-compose.yml
 scp nginx.conf <username>@<host>:/home/<username>/nginx.conf
 ```
-#### 3. Создание файла .env и заполнение его данными окружения:
+#### 3.1 Дополнительно. Создание .env файла для локального запуска:
+* Важно! Если решите запустить проект локально, для работы и запуска потребуется .env файл.
 * Внутри самого проекта. В папке backend/foodgram/ на уровне файла settings.py
 * Создайте файл .env:
 ```
@@ -66,6 +72,7 @@ sudo nano .env
     DB_HOST=<db>
     DB_PORT=<5432>
 ```
+* Примечание! При автоматическом deploy и развертывание проекта на сервере, данный файл создается автоматически.
 #### 4. Подготовка и запуск Workflow:
 * Для работы с Workflow добавьте в Secrets GitHub переменные окружения для работы:
 ```
@@ -75,17 +82,13 @@ sudo nano .env
     DB_PASSWORD=<пароль>
     DB_HOST=<db>
     DB_PORT=<5432>
-    
     DOCKER_PASSWORD=<пароль от DockerHub>
     DOCKER_USERNAME=<имя пользователя>
-    
     SECRET_KEY=<секретный ключ проекта django>
-
     USER=<username для подключения к серверу>
     HOST=<IP сервера>
     PASSPHRASE=<пароль для сервера, если он установлен>
     SSH_KEY=<ваш SSH ключ (для получения команда: cat ~/.ssh/id_rsa)>
-
     TELEGRAM_TO=<ID чата, в который придет сообщение>
     TELEGRAM_TOKEN=<токен вашего бота>
 ```
@@ -96,15 +99,25 @@ sudo nano .env
   - Отправка уведомления в телеграм-чат;
 
 #### 5. Сборка образа и запуск docker-compose:
-* По пути foodgram-project-react/infra запустите docker-compose:
+* Для ручного запуска проекта.
+  По пути foodgram-project-react/infra запустите docker-compose:
 ```
 sudo docker-compose up -d --build
 ```
-#### 6. Активация статики и проведение миграций после первого размещения проекта на сервере:
-* Сбор файлов статики внутри контейнера:
+  Где:
+    -d - запуск в фоновом режиме
+    --build - пересборка контайнеров
+* Если запуск происходит после Workflow, docker-compose запустится автоматически.
+* После запуска docker-compose обязательно проверьте статус контейнеров. Запущенный контейнер отображается со статусом "UP".
+  Проверить можно с помощью команды:
 ```
-sudo docker-compose exec backend python manage.py collectstatic --noinput
+sudo docker container ls
 ```
+* Если контейнер не запустился. Ознакомиться с логами запуска можно с помощью команды:
+```
+sudo docker container logs <id_контейнера>
+```  
+#### 6. Создание таблиц БД и сбор файлов статики:
 * Подготовка к миграциям внутри контейнера:
 ```
 sudo docker-compose exec backend python manage.py makemigrations --noinput
@@ -113,16 +126,15 @@ sudo docker-compose exec backend python manage.py makemigrations --noinput
 ```
 sudo docker-compose exec backend python manage.py migrate --noinput
 ```
-* Загрузка данных об ингредиентах в базу данных:
+* Сбор файлов статики внутри контейнера:
 ```
-sudo docker-compose exec backend python manage.py load_ingredients <Название файла из директории data>
+sudo docker-compose exec backend python manage.py collectstatic --noinput
 ```
 * Создайте суперпользователя с правами администратора:
 ```
 sudo docker-compose exec backend python manage.py createsuperuser
 ```
 ---
-### Автор: *Шарковский А.*
+#### Автор: *Шарковский А.*
 *https://github.com/Bazilit*
-
 ---
