@@ -1,6 +1,6 @@
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from rest_framework.serializers import CharField, IntegerField, ModelSerializer
+from rest_framework.serializers import ModelSerializer
 from rest_framework.validators import UniqueValidator
 
 from api.models import (Favorite, Ingredient, IngredientInRecipe, Recipe,
@@ -47,14 +47,9 @@ class IngredientSerializer(ModelSerializer):
 class FavoriteSerializer(ModelSerializer):
     """Серилайзер для модели Favorite."""
 
-    id = IntegerField(source='recipe.id')
-    name = CharField(source='recipe.name')
-    image = Base64ImageField(source='recipe.image')
-    cooking_time = IntegerField(source='recipe.cooking_time')
-
     class Meta:
         model = Favorite
-        fields = ('id', 'name', 'image', 'cooking_time')
+        fields = ('recipe', 'user')
 
 
 class IngredientRepresentationSerializer(serializers.ModelSerializer):
@@ -106,20 +101,49 @@ class RecipeListSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = '__all__'
 
+
+class RecipeListSerializer(serializers.ModelSerializer):
+    """
+    Сериализатор модели Recipe с ограниченным набором полей и
+    типом разрешения: Чтение.
+    Предназначен для метода to_representation основного
+    сериализатора: RecipeSerializer.
+    """
+
+    tags = TagSerializer(
+        many=True, read_only=True
+    )
+    author = CustomUserSerializer(read_only=True)
+    ingredients = serializers.SerializerMethodField(read_only=True)
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
+
+    class Meta:
+        model = Recipe
+        fields = '__all__'
+
     def get_ingredients(self, obj):
         """Метод получения списка ингредиентов."""
 
         queryset = IngredientInRecipe.objects.filter(recipe=obj)
         return IngredientRepresentationSerializer(queryset, many=True).data
 
+    def get_is_favorited(self, obj):
+        """Метод проверки на добавление рецепта в избранное."""
 
-class RecipeRepresentationSerializer(serializers.ModelSerializer):
-    """Сериализатор модели Recipe на чтение."""
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return Favorite.objects.filter(user=request.user, recipe=obj).exists()
 
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image',
-                  'cooking_time')
+    def get_is_in_shopping_cart(self, obj):
+        """Метод проверки добавления рецепта в корзину."""
+
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(
+            user=request.user, recipe=obj).exists()
 
 
 class RecipeSerializer(serializers.ModelSerializer):
@@ -129,8 +153,6 @@ class RecipeSerializer(serializers.ModelSerializer):
     Реализованы методы: Создания, Удаления, Обновления рецептов.
     """
 
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
     ingredients = IngredientInRecipeSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
@@ -144,23 +166,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('author',)
         model = Recipe
-
-    def get_is_favorited(self, obj):
-        """Метод проверки на добавление рецепта в избранное."""
-
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return Favorite.objects.filter(user=user, recipe=obj).exists()
-
-    def get_is_in_shopping_cart(self, obj):
-        """Метод проверки добавления рецепта в корзину."""
-
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return ShoppingCart.objects.filter(
-            user=request.user, recipe=obj).exists()
 
     def validate(self, validated_data):
         """

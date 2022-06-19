@@ -77,8 +77,8 @@ class RecipeViewSet(ModelViewSet):
             unit=F('ingredient__measurement_unit'),
             total_amount=Sum('amount')
             ).order_by('-total_amount')
-        buy_list = '\n'.join(
-            [(f"{ing['name']}: {ing['total_amount']} {ing['unit']}\n")
+        buy_list = '\r\n'.join(
+            [(f"{ing['name']}: {ing['total_amount']} {ing['unit']} ")
              for ing in ingredients]
             )
         response = HttpResponse(buy_list, 'Content-Type: text/plain')
