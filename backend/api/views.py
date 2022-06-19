@@ -100,8 +100,8 @@ class RecipeViewSet(ModelViewSet):
         methods=['post', 'delete'],
         detail=True,
         permission_classes=[IsAuthenticated],
-        url_path='favorites',
-        url_name='favorites',
+        url_path='favorite',
+        url_name='favorite',
         )
     def favorite(self, request, pk):
         """Добавление и удаление рецепта из избранное."""

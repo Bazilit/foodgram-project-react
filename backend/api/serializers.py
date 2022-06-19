@@ -101,8 +101,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
     )
     author = CustomUserSerializer(read_only=True)
     ingredients = serializers.SerializerMethodField(read_only=True)
-    is_favorited = serializers.SerializerMethodField(read_only=True)
-    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Recipe
@@ -113,23 +111,6 @@ class RecipeListSerializer(serializers.ModelSerializer):
 
         queryset = IngredientInRecipe.objects.filter(recipe=obj)
         return IngredientRepresentationSerializer(queryset, many=True).data
-
-    def get_is_favorited(self, obj):
-        """Метод проверки на добавление рецепта в избранное."""
-
-        user = self.context.get('request').user
-        if user.is_anonymous:
-            return False
-        return user.favorites.filter(id=obj.id).exists()
-
-    def get_is_in_shopping_cart(self, obj):
-        """Метод проверки добавления рецепта в корзину."""
-
-        request = self.context.get('request')
-        if not request or request.user.is_anonymous:
-            return False
-        return ShoppingCart.objects.filter(
-            user=request.user, recipe=obj).exists()
 
 
 class RecipeRepresentationSerializer(serializers.ModelSerializer):
@@ -148,6 +129,8 @@ class RecipeSerializer(serializers.ModelSerializer):
     Реализованы методы: Создания, Удаления, Обновления рецептов.
     """
 
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
     ingredients = IngredientInRecipeSerializer(many=True)
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
@@ -161,6 +144,23 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = '__all__'
         read_only_fields = ('author',)
         model = Recipe
+
+    def get_is_favorited(self, obj):
+        """Метод проверки на добавление рецепта в избранное."""
+
+        user = self.context.get('request').user
+        if user.is_anonymous:
+            return False
+        return Favorite.objects.filter(user=user, recipe=obj).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        """Метод проверки добавления рецепта в корзину."""
+
+        request = self.context.get('request')
+        if not request or request.user.is_anonymous:
+            return False
+        return ShoppingCart.objects.filter(
+            user=request.user, recipe=obj).exists()
 
     def validate(self, validated_data):
         """
