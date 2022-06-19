@@ -11,9 +11,9 @@
 
 [Сайт](http://51.250.30.28)
 
-Данные админа:
-login: admin
-password: admin
+* Данные админа: 
+- login: admin
+- password: admin
 ---
 
 ### Стэк технологий:
