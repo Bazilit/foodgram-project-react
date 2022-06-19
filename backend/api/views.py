@@ -78,14 +78,8 @@ class RecipeViewSet(ModelViewSet):
             total_amount=Sum('amount')
             ).order_by('-total_amount')
         buy_list = '\n'.join(
-            [
-                (
-                    f"{ingredient['name']}: "
-                    f"{ingredient['total_amount']} "
-                    f"{ingredient['unit']}\n"
-                    )
-                for ingredient in ingredients
-                ]
+            [(f"{ing['name']}: {ing['total_amount']} {ing['unit']}\n")
+             for ing in ingredients]
             )
         response = HttpResponse(buy_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename="buy_list.txt"'
